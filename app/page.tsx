@@ -9,11 +9,11 @@ import Cart from "./Cart";
 export default function Home() {
   return (
     <section className="bg-white text-gray-600 work-sans leading-normal text-base tracking-normal">
-      {/* <Navbar />
+      <Navbar />
       <Carousel />
       <Store />
       <About />
-      <Footer /> */}
+      <Footer />
 
       <Cart />
     </section>
