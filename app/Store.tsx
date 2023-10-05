@@ -1,27 +1,48 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-interface Product {
+import Cart from "./Cart";
+
+export interface Product {
   imageSrc: string;
   title: string;
   details: string[];
   description: string;
   price: string;
   paymentLink: string;
+  quantity: number;
 }
 
 interface Data {
   data: Product[];
 }
 
-function Store() {
+function formatPrice(priceString: string) {
+  if (typeof priceString !== "string") {
+    return priceString;
+  }
+  const cleanPrice = priceString.replace(/[,.]/g, "");
+  const formattedPrice = cleanPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return formattedPrice;
+}
+
+function Store({
+  addToCartCallback,
+}: {
+  addToCartCallback: (product: Product) => void;
+}) {
   const [products, setProducts] = useState<Data>({ data: [] });
+  const [cartItems, setCartItems] = useState<Product[]>([]);
 
   useEffect(() => {
     fetchData().then((data) => {
       setProducts(data);
     });
   }, []);
+
+  const addToCart = (product: Product) => {
+    setCartItems([...cartItems, product]);
+  };
 
   async function fetchData(): Promise<Data> {
     try {
@@ -108,8 +129,11 @@ function Store() {
               </ul>
               <p className="pt-2 text-justify">{product.description}</p>
               <div className="flex flex-row justify-between pt-4 align-middle">
-                <p className="pt-1 text-gray-900 font-bold">{product.price}</p>
-                <a href={product.paymentLink}>
+                <p className="pt-1 text-gray-900 font-bold">
+                  {" "}
+                  IDR {formatPrice(product.price)}
+                </p>
+                <a onClick={() => addToCartCallback(product)}>
                   <button className="border-2 border-black p-2 rounded-lg text-black hover:bg-green-400 hover:text-white hover:border-0">
                     Order
                   </button>

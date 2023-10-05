@@ -1,7 +1,12 @@
 import React from "react";
 import Image from "next/image";
 
-const Navbar = () => {
+interface NavbarProps {
+  toggleCart: () => void;
+  cartQuantity: number;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ toggleCart, cartQuantity }) => {
   return (
     <nav id="header" className="w-full z-30 top-0 py-1">
       <div className="w-full container mx-auto flex flex-wrap items-center justify-between mt-0 px-6 py-3">
@@ -63,13 +68,13 @@ const Navbar = () => {
             </svg>
           </a>
 
-          <a className="relative m-auto" id="shopping">
+          <a className="relative m-auto" id="shopping" onClick={toggleCart}>
             <div className="bottom-3 absolute left-4">
               <p
                 className="flex h-2 w-2 items-center justify-center rounded-full bg-red-500 p-3 text-xs text-white"
                 id="quantity"
               >
-                3
+                {cartQuantity}
               </p>
             </div>
             <svg

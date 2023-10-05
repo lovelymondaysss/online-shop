@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface Product {
@@ -12,35 +10,44 @@ interface Product {
   paymentLink: string;
 }
 
-interface Data {
-  data: Product[];
+interface CartProps {
+  cartItems: Product[];
+  onCloseCart: () => void;
+  updateCartQuantity: (newQuantity: number) => void;
 }
 
-function Cart() {
-  const [products, setProducts] = useState<Data>({ data: [] });
+function Cart({ cartItems, onCloseCart, updateCartQuantity }: CartProps) {
+  const [productQuantities, setProductQuantities] = useState<number[]>(
+    cartItems.map(() => 1)
+  );
 
   useEffect(() => {
-    fetchData().then((data) => {
-      setProducts(data);
-    });
-  }, []);
+    const newQuantity = cartItems.reduce(
+      (total, product, index) => total + productQuantities[index],
+      0
+    );
+    updateCartQuantity(newQuantity);
+  }, [cartItems, productQuantities]);
 
-  async function fetchData(): Promise<Data> {
-    try {
-      const response = await fetch(
-        "https://script.googleusercontent.com/macros/echo?user_content_key=h--REthNoJ87vQCBmdlEq1Aiw20MhnRkuT3mR4WXSr6LN76gjfajtF-Z99tDHL6IVRvfOecBNw8o6EYKJXp7kaqRmM4FvM0Hm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnBaGAzaKMwks_cfPcwvF5zywt-HaNcjje65LpyjDSCFbrvvsyaSvm7xUPx2lzfe7UBB5xSimbGXc6YfOUSo4xXd_egYeKfpc8tz9Jw9Md8uu&lib=MLNoOwPN3UqtZQdMquLKhJrSQ5gX-Q1U7"
-      );
+  const handleIncrement = (index: number) => {
+    const newQuantities = [...productQuantities];
+    newQuantities[index]++;
+    setProductQuantities(newQuantities);
+  };
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return { data: [] };
+  const handleDecrement = (index: number) => {
+    const newQuantities = [...productQuantities];
+    if (newQuantities[index] > 1) {
+      newQuantities[index]--;
+      setProductQuantities(newQuantities);
     }
-  }
+  };
+
+  const subtotal = cartItems.reduce((total, product, index) => {
+    const productQuantity = productQuantities[index];
+    const productPrice = parseFloat(product.price);
+    return total + productQuantity * productPrice;
+  }, 0);
 
   return (
     <section>
@@ -50,19 +57,26 @@ function Cart() {
           <button className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
             Checkout
           </button>
+
+          <button
+            onClick={onCloseCart}
+            className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Close
+          </button>
         </div>
         <div className="mt-8">
-          {products.data.map((product, index) => (
+          {cartItems.map((product, index) => (
             <div
               key={index}
               className="flex flex-col md:flex-row border-b border-gray-400 py-4"
             >
-              <div className="flex-shrink-0 relative">
+              <div className=" w-[20%] lg:w-[25s%] h-[120px] lg:h-[200px]  relative">
                 <Image
                   src={product.imageSrc}
                   fill
                   alt="Product image"
-                  className="w-32 h-32 object-cover"
+                  className=" object-cover"
                 />
               </div>
               <div className="mt-4 md:mt-0 md:ml-6">
@@ -73,19 +87,26 @@ function Cart() {
                   <div className="flex items-center">
                     <button
                       className="bg-gray-200 rounded-l-lg px-2 py-1"
-                      disabled
+                      onClick={() => handleDecrement(index)}
                     >
                       -
                     </button>
-                    <span className="mx-2 text-gray-600">1</span>
+                    <span className="mx-2 text-gray-600">
+                      {productQuantities[index]}
+                    </span>
                     <button
                       className="bg-gray-200 rounded-r-lg px-2 py-1"
-                      disabled
+                      onClick={() => handleIncrement(index)}
                     >
                       +
                     </button>
                   </div>
-                  <span className="ml-auto font-bold">${product.price}</span>
+                  <span className="ml-auto font-bold">
+                    IDR.{" "}
+                    {(
+                      parseFloat(product.price) * productQuantities[index]
+                    ).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -93,14 +114,7 @@ function Cart() {
         </div>
         <div className="flex justify-end items-center mt-8">
           <span className="text-gray-600 mr-4">Subtotal:</span>
-          <span className="text-xl font-bold">
-            $
-            {products.data
-              .reduce((total, product) => {
-                return total + parseFloat(product.price);
-              }, 0)
-              .toFixed(2)}
-          </span>
+          <span className="text-xl font-bold">IDR. {subtotal.toFixed(2)}</span>
         </div>
       </div>
     </section>
