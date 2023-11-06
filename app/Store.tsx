@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-import Cart from "./Cart";
-
 export interface Product {
   imageSrc: string;
   title: string;
@@ -114,7 +112,7 @@ function Store({
             >
               <img
                 className="hover:grow hover:shadow-lg"
-                src={product.imageSrc}
+                src={`https://drive.google.com/uc?export=view&id=${product.imageSrc}`}
                 alt={product.title}
               />
               <div className="pt-3 flex items-center justify-between">
